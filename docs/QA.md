@@ -1,10 +1,10 @@
-# Mangala 1.1 doğrulaması
+# Mangala 1.2 doğrulaması
 
 Tarih: 30 Ekim 2026
 
 ## Otomatik doğrulama
 
-`npm run build` ve `npm test`: **30 / 30 başarılı**.
+`npm run build` ve `npm test`: **32 / 32 başarılı**.
 
 - Başlangıç, tek taş, kaynak kuyuda bir taş bırakma, çok turlu dağıtım, rakip hazineyi atlama.
 - Çift ve tek rakip sayıları, dolu/boş karşı kuyu, ek hamle.
@@ -17,6 +17,17 @@ Tarih: 30 Ekim 2026
 - Sonucun yalnız bir kez puanlanması, turnuva boyunca dönüşümlü başlama, beraberlik ve rövanş.
 - Tek tek dağıtım sırası ve eldeki taş sayısı; bütün bulmaca çözümlerinde yakalama/toplama animasyonlarının motor sonucuna eşitliği; uçuş sırasında ve sonrasında taş korunumu.
 - 0, 1, 8, 24 ve 48 taşlı hazinelerde gerçek adetle eşleşen görseller ve iki yönlü yerleşim sınırları.
+
+## 1.2 tarayıcı kontrolleri
+
+- Önce 1.1 öğreticisi oynandı: dört taşlı kuyudan üçü alındığında yalnız bir uçan taş vardı; görünür toplam 46'ya düşüyordu. 1.2'de aynı anda bir taş kuyuda, üç taş havada ve toplam 48 taş doğrulandı.
+- 390×844 telefon ve 880×844 masaüstü iframe boyutlarında gerçek arayüz üzerinden oynandı. `tests/browser-audit.html` gözlenen animasyon karelerinde toplam taş sayısını, her kuyunun sayısı ile gerçek görsel adedinin eşleşmesini ve havadaki taşların büyümesini kaydeder; uygulamayı veya animasyon zamanını değiştirmez.
+- Telefon öğretici ilk iki adım: 12 ve 17 gözlenen karede toplam 48, sayaç uyuşmazlığı 0. Birlikte kaldırma, 3→2→1 elde kalan taş, hazineye son taş ve ek sıra doğrulandı.
+- Normal iki kişilik oyunda üst oyuncunun beş taşlı kuyusu: dört taş birlikte kaldırıldı; dağıtım ve altı taş yakalama sonrasında doğru 8 taşlık hazine.
+- Normal tek kişilik oyunda insan açılışı, bilgisayarın ek sırası, ikinci hamlesi ve altı taş yakalaması oynandı. Gözlenen tüm karelerde toplam 48 ve sayaç uyuşmazlığı 0; sonunda sıra insana döndü.
+- Beş taş havadayken ana sayfaya çıkıp maça dönme: havada taş kalmadı, 48 taş geri yüklendi, hamle bir kez kaydedildi ve ek sıra korundu.
+- Yükselen üç taşın %25 büyüdüğü ve kaynak kuyuda aynı ilk taşın kaldığı ekran görüntüsüyle incelendi. İnişte hedef kuyu/hazine boyutuna küçülme kullanılır.
+- Kuyularda 1–48 taşın tamamının çizimi, havadaki her taşa ayrı konum ayrılması, tek taş ve çok turlu dağıtımın bütünlüğü otomatik testlere eklendi.
 
 ## 1.1 tarayıcı kontrolleri
 

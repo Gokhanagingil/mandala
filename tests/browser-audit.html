@@ -1,0 +1,27 @@
+<!doctype html><html lang="tr"><meta charset="utf-8"><title>Mangala hareket doğrulaması</title><style>body{margin:0;background:#e9e7de;font:12px Arial;color:#234d40}header{padding:12px 22px;display:flex;gap:24px}main{display:flex;gap:18px;padding:0 20px}iframe{border:1px solid #c4c5ba;background:#f5f2e9;border-radius:16px;height:844px}#phone{width:390px}#desktop{width:880px}pre{margin:0;white-space:pre-wrap;max-width:620px}</style><header><pre id="phone-results">Telefon: hamle bekleniyor</pre><pre id="desktop-results">Masaüstü: hamle bekleniyor</pre></header><main><iframe id="phone" title="Telefon" src="../dist/index.html"></iframe><iframe id="desktop" title="Masaüstü" src="../dist/index.html"></iframe></main><script>
+for(const id of ['phone','desktop']){
+ const frame=document.getElementById(id),output=document.getElementById(id+'-results');
+ frame.addEventListener('load',()=>{
+  const doc=frame.contentDocument;let run=null,history=[];
+  function audit(){
+   const board=doc.querySelector('.board:not(.board-home)'),moving=board?.querySelectorAll('.carried-stone').length||0;
+   if(moving&&!run)run={frames:0,min:48,max:48,errors:0,maxHeld:0,phases:[],scale:false};
+   if(run&&board){
+    const all=board.querySelectorAll('.stone').length,drop=board.querySelectorAll('.dropping-stone').length;
+    run.frames++;run.min=Math.min(run.min,all);run.max=Math.max(run.max,all);run.maxHeld=Math.max(run.maxHeld,moving);
+    if(all!==48)run.errors++;
+    for(const el of board.querySelectorAll('[data-pit],[data-store]')){
+     const count=Number(el.querySelector('.pit-number,.store-count').textContent),stones=el.querySelectorAll('.stone').length;
+     if(count!==stones)run.errors++;
+    }
+    if([...board.querySelectorAll('.carried-stone')].some(el=>el.style.transform.includes('1.25')))run.scale=true;
+    const phase=moving?`${moving-drop} elde + ${drop} iniyor`:null;
+    if(phase&&run.phases.at(-1)!==phase)run.phases.push(phase);
+    output.textContent=id+': '+JSON.stringify(run);
+    if(!moving){history.push(run);output.textContent=id+' TAMAMLANDI: '+JSON.stringify(history);run=null;}
+   }else if(run&&!board){output.textContent=id+' İPTAL: '+JSON.stringify(run);run=null;}
+   requestAnimationFrame(audit);
+  }requestAnimationFrame(audit);
+ });
+}
+</script></html>
