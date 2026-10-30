@@ -41,7 +41,7 @@ def testFixture = tasks.register('prepareAndroidTestFixture', Exec) {
     workingDir rootProject.file('..')
     commandLine 'node', 'scripts/android-fixture.mjs'
 }
-tasks.named('preDebugAndroidTestBuild').configure { dependsOn testFixture }
+tasks.configureEach { if (name == 'preDebugAndroidTestBuild') dependsOn testFixture }
 tasks.named('preBuild').configure { dependsOn gameAssets }
 dependencies {
     implementation 'androidx.activity:activity:1.10.1'
