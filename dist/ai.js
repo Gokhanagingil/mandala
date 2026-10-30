@@ -1,5 +1,12 @@
 import {legalMoves,move,pitsOf,storeOf} from './engine.js';
-const LEVELS={easy:{depth:2,budget:900},medium:{depth:5,budget:14000},hard:{depth:9,budget:65000}};
+export const AI_LEVELS=Object.freeze({
+ beginner:{depth:1,budget:100,randomChance:.85,tolerance:0},
+ novice:{depth:1,budget:100,randomChance:.4,tolerance:0},
+ easy:{depth:2,budget:900,randomChance:0,tolerance:60},
+ steady:{depth:3,budget:5000,randomChance:0,tolerance:20},
+ medium:{depth:5,budget:14000,randomChance:0,tolerance:.01},
+ hard:{depth:9,budget:65000,randomChance:0,tolerance:.01}
+});
 function evaluate(s,root,style) {
   const diff=s.board[storeOf(root)]-s.board[storeOf(1-root)];
   if(s.ended) return diff===0?0:Math.sign(diff)*10000+diff*20;
@@ -14,9 +21,11 @@ function evaluate(s,root,style) {
 }
 export function chooseMove(state,level='medium',style='balanced',random=Math.random) {
   const options=legalMoves(state); if(!options.length) return {pit:null,nodes:0,depth:0};
+  const limits=AI_LEVELS[level]||AI_LEVELS.medium,root=state.turn;
+  // Beginners miss opportunities naturally; the board and rules never change.
+  if(limits.randomChance&&random()<limits.randomChance)return {pit:options[Math.min(options.length-1,Math.floor(random()*options.length))],nodes:0,depth:0};
   const wins=options.map(pit=>({pit,result:move(state,pit)})).filter(x=>x.result.state.ended&&x.result.state.winner===state.turn);
   if(wins.length){wins.sort((a,b)=>b.result.gain-a.result.gain);return {pit:wins[0].pit,nodes:0,depth:1,value:10000};}
-  const limits=LEVELS[level]||LEVELS.medium,root=state.turn;
   let nodes=0,aborted=false,completedDepth=0;
   let ranked=options.map(pit=>({pit,value:evaluate(move(state,pit).state,root,style)})).sort((a,b)=>b.value-a.value);
   function search(s,depth,alpha,beta) {
@@ -40,8 +49,7 @@ export function chooseMove(state,level='medium',style='balanced',random=Math.ran
     if(aborted)break;
     ranked=attempt.sort((a,b)=>b.value-a.value);completedDepth=depth;
   }
-  // Easy occasionally chooses a close alternative; never changes the actual board or rules.
-  const near=ranked.filter(r=>r.value>=ranked[0].value-(level==='easy'?60:0.01));
+  const near=ranked.filter(r=>r.value>=ranked[0].value-limits.tolerance);
   const selected=near[Math.min(near.length-1,Math.floor(random()*near.length))];
   return {pit:selected.pit,nodes,depth:completedDepth,value:selected.value};
 }

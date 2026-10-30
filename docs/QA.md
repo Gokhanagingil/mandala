@@ -1,10 +1,10 @@
-# Mangala 1.3 doğrulaması
+# Mangala 1.4 doğrulaması
 
 Tarih: 30 Ekim 2026
 
 ## Otomatik doğrulama
 
-`npm run build` ve `npm test`: **32 / 32 başarılı**.
+`npm run build` ve `npm test`: **41 / 41 başarılı**.
 
 - Başlangıç, tek taş, kaynak kuyuda bir taş bırakma, çok turlu dağıtım, rakip hazineyi atlama.
 - Çift ve tek rakip sayıları, dolu/boş karşı kuyu, ek hamle.
@@ -17,6 +17,37 @@ Tarih: 30 Ekim 2026
 - Sonucun yalnız bir kez puanlanması, turnuva boyunca dönüşümlü başlama, beraberlik ve rövanş.
 - Tek tek dağıtım sırası ve eldeki taş sayısı; bütün bulmaca çözümlerinde yakalama/toplama animasyonlarının motor sonucuna eşitliği; uçuş sırasında ve sonrasında taş korunumu.
 - 0, 1, 8, 24 ve 48 taşlı hazinelerde gerçek adetle eşleşen görseller ve iki yönlü yerleşim sınırları.
+- İlk açılışta yalnız en kolay rakip; kilitli/geçersiz seçimlerin reddi; bozuk kayıtta sıranın korunması.
+- Galibiyetle yalnız bir rakibin açılması; tekrar işleme, eski rakiple kazanma, kayıp, beraberlik ve yerel iki kişilik maçın haksız ilerleme yaratmaması.
+- Mini turnuvanın ilk elinde açılmama, seriyi kazanarak açılma; altı basamağı bitirme ve önceki rakipleri yeniden seçme.
+- Yeni karakterli ve eski isimsiz maçların kayıt uyumu; karakter ile yapay zekâ seviyesi ayrışan kayıtların reddi; rövanşta karakterin korunması.
+- Altı güç seviyesinde geçerli hamle ve kaynak tahtanın değişmemesi; başlangıç rakibinin fırsat kaçırabilmesi ve ustanın doğrudan bitişi bulması.
+
+## 1.4 rakip gücü karşılaştırması
+
+`node scripts/calibrate-rivals.mjs`: her karakter, aynı `easy` referansına karşı 24 maç oynadı (toplam **144**). Sabit tohumlu açılışlar kullanıldı, karakterler tahtanın iki tarafında da oynatıldı. Puan yüzdesi galibiyet için 1, beraberlik için 0,5 üzerinden hesaplandı.
+
+| Rakip | Galibiyet | Beraberlik | Yenilgi | Puan yüzdesi | Ortalama taş farkı |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Deniz · Çok kolay | 4 | 0 | 20 | %17 | −11,1 |
+| Ece · Kolay | 5 | 0 | 19 | %21 | −7,1 |
+| Can · Kolay + | 12 | 2 | 10 | %54 | +1,9 |
+| Ada · Orta | 14 | 2 | 8 | %63 | +3,4 |
+| Bora · Zor | 17 | 3 | 4 | %77 | +4,9 |
+| Lale · Usta | 20 | 1 | 3 | %85 | +9,3 |
+
+Bu örneklemde güç sırası kademeli arttı. Bunlar insan oyunculara karşı kazanma olasılıkları değildir; insanlarla zorluk kalibrasyonu henüz yapılmadı. Oyun sırasında oyuncunun performansına göre gizli seviye değiştirilmez; seçilen karakterin profili sabittir. Worker kullanılamazsa aynı profil sınırlı aramayla ana iş parçacığında çalışır.
+
+## 1.4 tarayıcı kontrolleri
+
+- Masaüstü ve 390×844 telefon iframe görünümünde ilk açılış: Deniz seçili, diğer beş rakip kilitli; açma şartları kartlarda okunuyor. Telefon içeriği 375 CSS pikselde yatay taşmıyor.
+- Kural motoruyla başlangıçtan oynanmış, geçmiş doğrulamasından geçen 47 hamlelik bir maçın son konumu geliştirme fikstüründen yüklendi. Son hamle gerçek oyun arayüzünde oynandı; 36–12 galibiyette Ece açıldı. Tarayıcıda 48 hamlenin tamamı elle oynanmış değildir.
+- “Ece ile oyna” yeni maçı doğru ad ve Kolay profille başlattı. Oyun içindeki “Rakip seç” ile Deniz seçildi; mevcut maçı değiştirme açıklaması onaylandı ve Çok kolay Deniz ile yeni tahta açıldı.
+- Yeniden yüklemede 2/6 açık rakip, seçili Deniz ve devam edilebilir maç korundu. Açılan Ece tekrar kilitlenmedi.
+- Rakip değiştirirken “Vazgeç” seçilince Deniz seçimi ve iki hamlelik mevcut maç korundu. Aynı işlem onaylandığında Ece ile sıfır hamleli yeni maç başladı.
+- Deniz ile normal açılış ve Worker karşı hamlesi oynandı; sıra insana döndü, iki hamle geçmişte göründü ve tahtada 48 taş kaldı.
+- Telefon ve masaüstü rakip kartları, kaydırılabilir liste ve kapatma düğmesi görsel olarak incelendi. İlk geliştirme denemesinde bulunan eksik ekran parametresi düzeltildi; yükleme ve seçim akışı yeniden denendi.
+- 880 piksel iframe görünümündeki dekoratif arka plan taşması düzeltildi; 865 CSS piksel içerikte kaydırma genişliği de 865 piksel.
 
 ## 1.3 tarayıcı kontrolleri
 

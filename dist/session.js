@@ -1,6 +1,9 @@
 import {initialState,validState,legalMoves,move} from './engine.js';
+import {AI_LEVELS} from './ai.js';
+import {opponentById} from './opponents.js';
 export function validSession(s){
- if(!(s?.version===1&&['solo','local'].includes(s.mode)&&validState(s.state)&&['easy','medium','hard'].includes(s.level)&&['balanced','bold','defensive'].includes(s.style)&&typeof s.assisted==='boolean'&&[1,2].includes(s.target)&&[0,1].includes(s.starter)&&Number.isInteger(s.round)&&s.round>0&&typeof s.recorded==='boolean'&&Array.isArray(s.wins)&&s.wins.length===2&&s.wins.every(n=>Number.isInteger(n)&&n>=0&&n<=s.target)&&Array.isArray(s.names)&&s.names.length===2&&s.names.every(n=>typeof n==='string'&&n.length>0&&n.length<=24)&&Array.isArray(s.history)&&s.history.length<=2000))return false;
+ if(!(s?.version===1&&['solo','local'].includes(s.mode)&&validState(s.state)&&Object.hasOwn(AI_LEVELS,s.level)&&['balanced','bold','defensive'].includes(s.style)&&typeof s.assisted==='boolean'&&[1,2].includes(s.target)&&[0,1].includes(s.starter)&&Number.isInteger(s.round)&&s.round>0&&typeof s.recorded==='boolean'&&Array.isArray(s.wins)&&s.wins.length===2&&s.wins.every(n=>Number.isInteger(n)&&n>=0&&n<=s.target)&&Array.isArray(s.names)&&s.names.length===2&&s.names.every(n=>typeof n==='string'&&n.length>0&&n.length<=24)&&Array.isArray(s.history)&&s.history.length<=2000))return false;
+ if(s.opponentId!==undefined){const o=opponentById(s.opponentId);if(s.mode!=='solo'||!o||s.level!==o.level||s.style!==o.style||s.names[1]!==o.name)return false;}
  let current=initialState(s.starter);
  for(const h of s.history){if(!h||!validState(h.before)||JSON.stringify(current)!==JSON.stringify(h.before)||!legalMoves(current).includes(h.pit))return false;current=move(current,h.pit).state;}
  return JSON.stringify(current)===JSON.stringify(s.state)&&(!s.recorded||s.state.ended);

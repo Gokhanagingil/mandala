@@ -4,7 +4,16 @@ Türk Mangala’sının tarayıcıda oynanan, Türkçe ve mobil uyumlu sürümü
 
 Oyun: https://mangala.gokhan-agingil.chatgpt.site
 
-## Sürüm 1.3
+## Sürüm 1.4
+
+- Bilgisayara karşı altı karakter: **Deniz → Ece → Can → Ada → Bora → Lale**. İlk açılışta çok kolay Deniz seçilidir; bir maç kazanmak sıradaki rakibi açar.
+- Açılan rakipler her zaman seçilebilir. Daha kolay rakibe dönmek, kaybetmek veya berabere kalmak ilerlemeyi geri almaz. Eski bir rakibi tekrar yenmek basamak atlatmaz.
+- Yeni rakibe geçiş oyuncunun seçimidir: sonuç ekranında sonraki rakip, rövanş ve rakip seçimi birlikte sunulur. Oyun içinden rakip değiştirirken mevcut maçın yerine yeni maç başlatılacağı açıklanır.
+- Mini turnuvada tek el kazanmak yeterli değildir; iki galibiyetle seriyi tamamlamak gerekir. Yarım kalan seriler, el aralarında da devam ettirilebilir.
+- İlk iki rakip fırsatları sık kaçırır; sonraki rakiplerde hamle arama derinliği artar. Aynı referansa karşı 144 tohumlu maçta güç sırası kontrol edildi; ayrıntılar `docs/QA.md` içinde.
+- Seçim ve ilerleme tarayıcıda kalıcıdır. Eski sürümdeki kayıtlı maçlar korunur; eski isimsiz rakiplerle oynanan maçlar yeni karakter yolunda basamak açmaz.
+
+### Önceki tahta iyileştirmeleri
 
 - Hazineler her ekran yönünde tahtanın iki yanında: alt oyuncunun hazinesi sağda, üst oyuncununki solda. Oyuncu adı, simge, sıra rengi ve yön açıklaması birlikte aidiyeti gösterir; sıra değişince renkler değişmez.
 - Telefon yatay çevrildiğinde tahta genişler; başlıklar ve hamle çubuğu ekran yüksekliğine uyarlanır. Dikey kullanım da açık kalır ve kısa bir yatay kullanım önerisi gösterilir; ekran yönü zorlanmaz.
@@ -21,7 +30,7 @@ Oyun: https://mangala.gokhan-agingil.chatgpt.site
 
 ## Oyun özellikleri
 
-- Tek kişi: üç zorluk (Rahat / Odaklı / Usta), üç değerlendirme tarzı (Dengeli / Atak / Temkinli). Cihaz üzerinde çalışan, Web Worker içindeki sınırlı arama; ücretli API veya LLM yok.
+- Tek kişi: portreli ve farklı güçte altı bilgisayar rakibi; kazanarak açılan, yeniden seçilebilen masalar. Cihaz üzerinde çalışan, Web Worker içindeki sınırlı arama; ücretli API veya LLM yok.
 - Aynı cihazda iki kişi: oyuncu adları, açık sıra göstergesi, iki oyuncuya ortak önizleme tercihi.
 - Tek el veya ilk iki galibiyete ulaşanın kazandığı mini turnuva. Her elde başlayan oyuncu değişir; beraberlik galibiyet sayılmaz.
 - Beş uygulamalı ders, gerçek oyunlardan türetilmiş ve tek çözümlü 18 bulmaca. Günün seçkisi bu 18 bulmacayı sırayla öne çıkarır; her gün yeni içerik üretildiği iddia edilmez.
@@ -50,6 +59,8 @@ Node 22+ önerilir. Üretim dosyaları doğrudan `dist/` içinde, bağımlılık
 ```sh
 npm run build
 npm test
+# Rakiplerin göreli gücünü aynı referansa karşı karşılaştırmak için:
+node scripts/calibrate-rivals.mjs
 # Bulmacaları aynı tohumla yeniden üretmek için:
 npm run puzzles
 # Yerel sunucu:
@@ -63,6 +74,8 @@ python3 -m http.server 8000 --directory dist
 - `dist/engine.js`: saf kural motoru ve animasyon olayları
 - `dist/animation.js`: aynı taşları kaldırma/taşıma/bırakma, hazine yerleşimi ve görsel olay sırası
 - `dist/ai.js`, `dist/ai-worker.js`: seviyeli bilgisayar rakibi
+- `dist/opponents.js`: karakterler, kalıcı ilerleme ve maç galibiyetiyle açılma kuralları
+- `dist/rivals-ui.js`: portreler, rakip kartları ve maç sonu ilerleme sunumu
 - `dist/session.js`: kayıt doğrulama, tur puanlama, rövanş
 - `dist/app.js`: ekranlar, yerel kayıt, ses, etkileşimler
 - `dist/style.css`: duyarlı tahta ve arayüz
