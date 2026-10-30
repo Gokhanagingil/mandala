@@ -1,10 +1,10 @@
-# Mangala 1.0 doğrulaması
+# Mangala 1.1 doğrulaması
 
 Tarih: 30 Ekim 2026
 
 ## Otomatik doğrulama
 
-`npm run build` ve `npm test`: **27 / 27 başarılı**.
+`npm run build` ve `npm test`: **30 / 30 başarılı**.
 
 - Başlangıç, tek taş, kaynak kuyuda bir taş bırakma, çok turlu dağıtım, rakip hazineyi atlama.
 - Çift ve tek rakip sayıları, dolu/boş karşı kuyu, ek hamle.
@@ -15,8 +15,17 @@ Tarih: 30 Ekim 2026
 - Üç zorlukta geçerli bilgisayar hamlesi, hemen kazandıran bitişler, bitmiş oyunda hamle üretilmemesi.
 - Kaydetme/geri açma, ek hamle ve bekleyen bilgisayar sırasının korunması; bozuk veya ayrışmış geçmişin reddi.
 - Sonucun yalnız bir kez puanlanması, turnuva boyunca dönüşümlü başlama, beraberlik ve rövanş.
+- Tek tek dağıtım sırası ve eldeki taş sayısı; bütün bulmaca çözümlerinde yakalama/toplama animasyonlarının motor sonucuna eşitliği; uçuş sırasında ve sonrasında taş korunumu.
+- 0, 1, 8, 24 ve 48 taşlı hazinelerde gerçek adetle eşleşen görseller ve iki yönlü yerleşim sınırları.
 
-## Tarayıcıda denenen akışlar
+## 1.1 tarayıcı kontrolleri
+
+- Masaüstünde 3. bulmacanın dağıtım ve altı taş yakalama akışı: hazineler 1 ve 8; görünen taş adetleri de 1 ve 8.
+- 390×844 ve 360×800 iframe telefon benzetimlerinde üst/alt hazine taşları, ayrı sayı rozetleri ve Sakin varsayılanı görsel olarak incelendi. Dar görünümde içerik ve görünüm genişliği 345 px; yatay taşma yok.
+- Hamle sırasında gerçek uçan taş DOM'da gözlendi; hedef henüz 1 taş gösterirken uçan taş ve “Elde 3 taş” durumu birlikte vardı. Hamle bitince sonuç ve sıra değişti.
+- İki kişilik oyunda uçan taş görünürken ana sayfaya çıkılıp kayıtlı oyuna dönüldü: hamle yalnız bir kez kaydedildi, 1 taşlık hazine ve ek sıra korundu; eski uçuş öğeleri kalmadı.
+
+## 1.0 sürümünde tarayıcıda denenen akışlar
 
 Cloud Chrome önizlemesi üzerinden gerçek DOM etkileşimleriyle:
 

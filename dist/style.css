@@ -19,3 +19,23 @@ dialog{background:var(--white);color:var(--ink);padding:30px;border:1px solid #d
 @media(max-width:480px){.board-grid,.board-home .board-grid,.game-layout .board-grid{column-gap:4px}.hero-art{overflow:clip;padding-bottom:24px}.hero-note{right:2%;font-size:15px}.board-caption{margin-top:30px}.mobile-dock{gap:10px;padding-left:14px;padding-right:14px}.mobile-dock .primary{font-size:12px}}
 
 @media(max-width:480px){.hero-note{display:none}.board-home{transform:none}}
+
+/* The treasury keeps a visible pile; count badges remain separate and legible. */
+.store-stones{position:absolute;inset:30px 5px 46px;pointer-events:none;overflow:hidden;border-radius:20px}
+.store .treasury-stone{left:var(--sx);top:var(--sy);width:34%;height:15px;max-width:22px;max-height:18px}
+.store-count{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:30px;height:30px;font-size:15px;background:#fff2d6;z-index:4}
+.store-label{top:10px;bottom:auto;left:0;right:0;font-size:7px;letter-spacing:.8px}
+.flying-stone{left:0;top:0;width:23px;height:20px;z-index:12;pointer-events:none;box-shadow:inset -2px -3px 3px #16483c70,0 9px 9px #4d351f44;will-change:transform}
+.pit.receiving,.store.receiving{outline:3px solid #fff4c7;outline-offset:3px;filter:brightness(1.06)}
+.distribution-status{position:absolute;top:-17px;left:50%;transform:translateX(-50%);z-index:14;background:#214d43;color:#fff5dc;padding:7px 13px;border-radius:15px;font-size:11px;font-weight:600;white-space:nowrap;box-shadow:0 3px 9px #29413230;pointer-events:none}
+@keyframes well-pulse{45%{filter:brightness(1.2);box-shadow:inset 0 3px 8px #67452260,0 0 0 4px #f9e6ad99}}.pit.falling,.store.falling{animation:well-pulse .38s ease-out}
+@media(max-width:1000px){.store .treasury-stone{height:12px}.store-stones{inset:24px 4px 41px}.store-label{font-size:6px}.store-count{width:26px;height:26px;font-size:13px}}
+@media(max-width:480px){
+ .board-grid,.board-home .board-grid,.game-layout .board-grid{grid-template-rows:44px 65px 65px 44px}
+ .store-stones{inset:6px 47px;border-radius:8px}
+ .store .treasury-stone{left:var(--mx);top:var(--my);width:15px;height:12px;max-width:none;max-height:none}
+ .store-count{top:7px;bottom:auto;left:auto;transform:none;width:27px;height:26px}
+ .left-store .store-count{left:10px}.right-store .store-count{right:10px}
+ .store-label,.board-home .store-label{display:block;top:-10px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);background:#e5c695;color:#624523;padding:2px 7px;border-radius:5px;font-size:7px;letter-spacing:1px;white-space:nowrap;z-index:3}
+ .distribution-status{top:-16px;padding:6px 11px;font-size:10px}.flying-stone{width:19px;height:17px}
+}

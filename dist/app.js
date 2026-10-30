@@ -2,6 +2,7 @@ import {initialState,move,legalMoves,validState,explain,storeOf,owns} from './en
 import {chooseMove} from './ai.js';
 import {puzzles} from './puzzles.js';
 import {validSession,settleRound,advanceRound} from './session.js';
+import {SPEEDS,animationSteps,treasuryStones,flyStone,cancelFlights} from './animation.js';
 
 const $=s=>document.querySelector(s),app=$('#app'),modal=$('#modal');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,7 +10,8 @@ const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem('mangala.
 let storageOK=true;
 const write=(key,value)=>{try{localStorage.setItem('mangala.'+key,JSON.stringify(value));}catch{storageOK=false;}};
 const prefsRaw=read('settings',{});
-let prefs={sound:prefsRaw?.sound===true,speed:['slow','normal','fast'].includes(prefsRaw?.speed)?prefsRaw.speed:'normal'};
+let prefs={sound:prefsRaw?.sound===true,speed:prefsRaw?.paceVersion===2&&['slow','normal','fast'].includes(prefsRaw?.speed)?prefsRaw.speed:'slow',paceVersion:2};
+if(prefsRaw?.paceVersion!==2)write('settings',prefs);
 let progress=read('progress',{});if(!progress||typeof progress!=='object'||Array.isArray(progress))progress={};
 progress.solved=Array.isArray(progress.solved)?[...new Set(progress.solved.filter(i=>Number.isInteger(i)&&i>=1&&i<=18))]:[];
 progress.learned=progress.learned===true;
@@ -36,7 +38,7 @@ function sound(kind='drop'){
 }
 function announce(text){$('#live').textContent=text;}
 function toast(text){$('.notice')?.remove();const n=document.createElement('div');n.className='notice';n.role='status';n.textContent=text;document.body.append(n);setTimeout(()=>n.remove(),3500);}
-function stopAsync(){epoch++;busy=false;thinking=false;replaying=false;worker?.terminate();worker=null;clearTimeout(workerTimer);workerTimer=null;}
+function stopAsync(){epoch++;cancelFlights();busy=false;thinking=false;replaying=false;worker?.terminate();worker=null;clearTimeout(workerTimer);workerTimer=null;}
 function saveSession(){if(session){saved=structuredClone(session);write('session',saved);}}
 function nav(to){stopAsync();selected=null;previewResult=null;feedback='';success=false;view=to;render();window.scrollTo({top:0,behavior:'instant'});$('#main')?.focus({preventScroll:true});}
 function header(){const active=view==='home'||view==='game'?'home':view==='learn'?'learn':'puzzles';return `<div class="shell"><header class="header"><button class="brand" data-action="nav" data-to="home" aria-label="Mangala ana sayfa"><img src="./icon.svg" alt=""><span class="brand-word">mangala<small>Bir avuç taş, bin hamle</small></span></button><nav class="nav" aria-label="Ana menü"><button class="${active==='home'?'active':''}" data-action="nav" data-to="home">Oyna</button><button class="${active==='learn'?'active':''}" data-action="learn">Öğren</button><button class="${active==='puzzles'?'active':''}" data-action="nav" data-to="puzzles">Bulmacalar</button></nav><div class="header-tools"><button class="icon-btn sound-btn" data-action="sound" aria-label="Sesi ${prefs.sound?'kapat':'aç'}" aria-pressed="${prefs.sound}">${prefs.sound?'♪':'♩'}</button><button class="icon-btn" data-action="settings" aria-label="Ayarlar">⚙</button></div></header></div>`;}
@@ -49,13 +51,13 @@ function boardMarkup(board=state?.board||initialState().board,decorative=false){
  const enabled=canPlay?legalMoves(state):[];
  const preview=decorative?null:previewResult;
  const well=i=>{const col=innerWidth<=480?(i<6?i+1:13-i):(i<6?i+2:14-i);return `<button class="pit ${i<6?'bottom-pit':'top-pit'} ${enabled.includes(i)?'playable':''} ${selected===i&&!decorative?'selected':''} ${preview?.path.includes(i)?'path-mark':''} ${preview?.last===i?'last-mark':''}" style="grid-column:${col}" data-pit="${i}" ${enabled.includes(i)?'':'disabled'} aria-label="${pitLabel(i,board[i])}" ${decorative?'tabindex="-1" aria-hidden="true"':`aria-pressed="${selected===i}"`}><span class="pit-index" aria-hidden="true">${i<6?i+1:i-6}</span><span class="stone-bed" aria-hidden="true">${stones(board[i],i)}</span><span class="pit-number" aria-hidden="true">${board[i]}</span></button>`;};
- const store=(p,cls)=>`<div class="store ${cls}" data-store="${storeOf(p)}" aria-label="${p?'Üst':'Alt'} oyuncunun hazinesi: ${board[storeOf(p)]} taş"><span class="store-count">${board[storeOf(p)]}</span><span class="store-label">${p?'ÜST':'ALT'} HAZİNE</span></div>`;
- return `<div class="board ${decorative?'board-home':''}" ${decorative?'aria-hidden="true"':'role="group" aria-label="Mangala oyun tahtası"'}><div class="board-grid">${store(1,'left-store')}${[12,11,10,9,8,7].map(well).join('')}${[0,1,2,3,4,5].map(well).join('')}${store(0,'right-store')}</div></div>`;
+ const store=(p,cls)=>`<div class="store ${cls}" data-store="${storeOf(p)}" aria-label="${p?'Üst':'Alt'} oyuncunun hazinesi: ${board[storeOf(p)]} taş"><span class="store-stones" aria-hidden="true">${treasuryStones(board[storeOf(p)],storeOf(p))}</span><span class="store-count">${board[storeOf(p)]}</span><span class="store-label">${p?'ÜST':'ALT'} HAZİNE</span></div>`;
+ return `<div class="board ${decorative?'board-home':''}" ${decorative?'aria-hidden="true"':'role="group" aria-label="Mangala oyun tahtası"'}><div class="board-grid">${store(1,'left-store')}${[12,11,10,9,8,7].map(well).join('')}${[0,1,2,3,4,5].map(well).join('')}${store(0,'right-store')}</div><div class="distribution-status" hidden aria-hidden="true"></div></div>`;
 }
 function paintBoard(board,flash){
  for(const p of [0,1]){const score=document.getElementById('score-'+p);if(score)score.textContent=board[storeOf(p)];}
  document.querySelectorAll('[data-pit]').forEach(el=>{const i=Number(el.dataset.pit);el.querySelector('.stone-bed').innerHTML=stones(board[i],i);el.querySelector('.pit-number').textContent=board[i];el.setAttribute('aria-label',pitLabel(i,board[i]));el.classList.toggle('falling',i===flash);});
- document.querySelectorAll('[data-store]').forEach(el=>{const i=Number(el.dataset.store);el.querySelector('.store-count').textContent=board[i];el.setAttribute('aria-label',`${i===6?'Alt':'Üst'} oyuncunun hazinesi: ${board[i]} taş`);});
+ document.querySelectorAll('[data-store]').forEach(el=>{const i=Number(el.dataset.store);el.querySelector('.store-stones').innerHTML=treasuryStones(board[i],i);el.querySelector('.store-count').textContent=board[i];el.classList.toggle('falling',i===flash);el.setAttribute('aria-label',`${i===6?'Alt':'Üst'} oyuncunun hazinesi: ${board[i]} taş`);});
 }
 function home(){const n=progress.solved.length;return `<section class="hero"><div class="hero-copy"><div class="eyebrow">Kökleri eski. Keyfi hep yeni.</div><h1>Taşlar küçük.<br>Hamleler <em>büyük.</em></h1><p class="lead">Bir avuç taşla düşün, şaşırt, yeniden oyna.<br>Türk Mangala’sında masanın öbür tarafı seni bekliyor.</p><div class="play-setup"><div class="segmented" role="group" aria-label="Oyun modu"><button class="${homeMode==='solo'?'selected':''}" data-action="mode" data-mode="solo" aria-pressed="${homeMode==='solo'}">◉ &nbsp; Bilgisayara karşı</button><button class="${homeMode==='local'?'selected':''}" data-action="mode" data-mode="local" aria-pressed="${homeMode==='local'}">◎ &nbsp; İki kişilik</button></div>${homeMode==='solo'?`<div class="setup-fields"><label class="field"><span>Rakibin seviyesi</span><select id="level">${Object.entries(levelName).map(([v,t])=>`<option value="${v}" ${homeSetup.level===v?'selected':''}>${t}${v==='easy'?' · kolay':v==='medium'?' · orta':' · zor'}</option>`).join('')}</select></label><label class="field"><span>Oyun tarzı</span><select id="style">${Object.entries(styleName).map(([v,t])=>`<option value="${v}" ${homeSetup.style===v?'selected':''}>${t}</option>`).join('')}</select></label></div>`:`<div class="setup-fields"><label class="field"><span>Alt taraftaki oyuncu</span><input id="name0" maxlength="24" value="${esc(homeSetup.names[0])}" autocomplete="off"></label><label class="field"><span>Üst taraftaki oyuncu</span><input id="name1" maxlength="24" value="${esc(homeSetup.names[1])}" autocomplete="off"></label></div>`}<div class="setup-fields"><label class="field"><span>Maç biçimi</span><select id="format"><option value="1" ${homeSetup.target===1?'selected':''}>Tek el</option><option value="2" ${homeSetup.target===2?'selected':''}>Mini turnuva · 2 galibiyet</option></select></label></div><label class="check-field"><input id="assisted" type="checkbox" ${homeSetup.assisted?'checked':''}>Hamle önizlemesi açık${homeMode==='local'?' · iki oyuncu için de':''}</label><div class="start-row"><button class="primary" data-action="new">Masaya otur <span aria-hidden="true">↗</span></button><button class="secondary" data-action="learn">Önce öğren</button></div>${saved&&!saved.state.ended?`<button class="resume" data-action="resume">↳ Yarım kalan oyuna dön · ${saved.state.moves} hamle</button>`:''}</div></div><div class="hero-art"><div class="hero-note">Bir hamlede her şey değişebilir.</div><div class="art-topline"><span><span class="dot"></span>Türk Mangala’sı</span><span>12 kuyu · 48 taş</span></div>${boardMarkup(initialState().board,true)}<div class="board-caption"><span>Taşlarını dağıt. Fırsatları topla.</span><em>Hamle sende.</em></div></div></section><section class="intro-rules" aria-label="Oyunun özü"><div class="rule-snippet"><span class="rule-number">01</span><div><h3>Bir kuyu seç.</h3><p>Taşları sırayla dağıt.<br>Her taş bir sonraki hamleyi değiştirir.</p></div></div><div class="rule-snippet"><span class="rule-number">02</span><div><h3>Son taşı hesapla.</h3><p>Ek sıra kazan, çiftle ya da<br>boş kuyunun fırsatını yakala.</p></div></div><div class="rule-snippet"><span class="rule-number">03</span><div><h3>Hazinen büyüsün.</h3><p>En çok taşı toplayan kazanır.<br>Acele etme, güzel düşün.</p></div></div></section><section class="discovery"><div><div class="eyebrow">Küçük bir zihin molası</div><h2>Bir tahta. Tek doğru hamle.</h2><p>18 kısa strateji bulmacası${n?` · ${n} tanesini çözdün`:', kolay bir başlangıçtan ince hesaplara'}.</p></div><button class="secondary" data-action="nav" data-to="puzzles">Bulmacaları keşfet <span aria-hidden="true">↗</span></button></section>`;}
 function playerStrip(p){const actual=view==='game',names=actual?session.names:['Sen','Rakip'];const turn=!state.ended&&state.turn===p;return `<div class="player-strip ${p===0?'bottom':''} ${turn?'is-turn':''}"><div class="player-name"><div class="avatar ${p===0?'teal':''}">${p===0?'●':'◈'}</div><div><strong>${esc(names[p])}</strong><small>${actual&&session.mode==='solo'&&p===1?`${levelName[session.level]} · ${styleName[session.style]} rakip`:p===0?'Alt sıradaki kuyular':'Üst sıradaki kuyular'}${turn?' · sıra sende':''}</small></div></div><div class="score"><span id="score-${p}">${state.board[storeOf(p)]}</span><small>taş</small></div></div>`;}
@@ -86,16 +88,44 @@ function startLesson(i=0){stopAsync();lesson=i;state=structuredClone(lessons[i].
 function startPuzzle(id){const p=puzzles.find(x=>x.id===id);if(!p)return;stopAsync();puzzle=p;state=structuredClone(p.state);selected=null;previewResult=null;feedback='';success=false;attempts=0;view='puzzle';render();window.scrollTo({top:0,behavior:'instant'});announce(p.goal);}
 function selectPit(i){if(busy||thinking||success||state.ended||!legalMoves(state).includes(i)||(view==='game'&&session.mode==='solo'&&state.turn!==0))return;selected=i;feedback='';previewResult=(view==='learn'||view==='game'&&session.assisted)?move(state,i):null;render();document.querySelector(`[data-pit="${i}"]`)?.focus({preventScroll:true});announce(`${i<6?i+1:i-6}. kuyu seçildi. Hamleyi oyna düğmesiyle onayla.`);}
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function animate(result,token){const delay=reduced()||document.hidden?0:prefs.speed==='slow'?190:prefs.speed==='fast'?35:95;for(const event of result.events){if(token!==epoch)return false;paintBoard(event.board,event.pit);if(delay){sound(event.type==='capture'?'capture':'drop');await pause(event.type==='capture'||event.type==='sweep'?delay*3:delay);}}return token===epoch;}
-function finishRound(){if(settleRound(session)){if(session.mode==='solo'){stats.played++;if(state.winner===0)stats.won++;if(state.winner===null)stats.draw++;write('stats',stats);}saveSession();sound('win');}}
+async function animate(result,token){
+ const timing=SPEEDS[prefs.speed],steps=animationSteps(result);
+ const status=text=>{const label=$('.distribution-status');if(label){label.hidden=false;label.textContent=text;}};
+ for(const step of steps){
+  if(token!==epoch)return false;
+  if(reduced()||document.hidden){paintBoard(result.state.board);break;}
+  if(step.type==='lift'){
+   status(`Elde ${step.hand} taş`);
+   document.querySelector(`[data-pit="${step.from}"]`)?.classList.add('receiving');
+   await pause(timing.lift);if(token!==epoch)return false;
+   paintBoard(step.board);continue;
+  }
+  if(step.type==='transfer'){
+   status(step.kind==='sweep'?'Kalan taşlar hazineye…':'Yakalanan taşlar hazineye…');
+   paintBoard(step.depart);
+  }else status(`Elde ${step.hand+1} taş · sıradaki bölmeye`);
+  await flyStone(step.from,step.to,step.type==='transfer'?timing.transfer:timing.flight,step.board[step.to]-1);
+  if(token!==epoch)return false;
+  paintBoard(step.board,step.to);sound(step.type==='transfer'?'capture':'drop');
+  if(step.type==='drop')status(step.hand?`Elde ${step.hand} taş`:result.extra?'Son taş hazinede · bir hamle daha!':'Son taş yerinde');
+  await pause(step.type==='transfer'?60:timing.land);
+ }
+ if(token!==epoch)return false;
+ document.querySelectorAll('.receiving').forEach(n=>n.classList.remove('receiving'));
+ if(!reduced()&&!document.hidden){status(result.state.ended?'Taşlar toplandı':result.extra?'Bir hamle daha!':'Dağıtım tamamlandı');await pause(timing.result);}
+ if(token!==epoch)return false;
+ const label=$('.distribution-status');if(label)label.hidden=true;
+ return true;
+}
+function finishRound(){if(settleRound(session)){if(session.mode==='solo'){stats.played++;if(state.winner===0)stats.won++;if(state.winner===null)stats.draw++;write('stats',stats);}saveSession();}}
 async function playPit(pit){if(busy||thinking||state.ended)return;const token=epoch,before=structuredClone(state),result=move(state,pit,true);selected=null;previewResult=null;busy=true;feedback='';
  if(view==='game'){session.history.push({before,pit});session.state=result.state;state=result.state;finishRound();saveSession();}else state=result.state;
- render();paintBoard(before.board);if(!await animate(result,token))return;busy=false;
+ state=before;render();paintBoard(before.board);if(!await animate(result,token))return;state=result.state;busy=false;if(state.ended)sound('win');
  if(view==='game'){lastMessage=`${session.names[result.player]}: ${explain(result).replaceAll('hazinene','hazinesine').replaceAll('kuyuna','kuyusuna').replace('Bir hamle daha senin!','Bir hamle daha kazandı.').replace('topladın.','topladı.')}`;render();announce(`${lastMessage}${state.ended?' El bitti.':` Sıra ${session.names[state.turn]}.`}`);if(state.ended)$('.result-banner')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'nearest'});else scheduleComputer();}
  else{attempts++;const correct=(view==='learn'?lessons[lesson].solution:puzzle.solutions).includes(pit);success=correct;if(correct){feedback=view==='learn'?lessons[lesson].detail:`Doğru hamle! ${explain(result)}`;if(view==='puzzle'&&!progress.solved.includes(puzzle.id)){progress.solved.push(puzzle.id);write('progress',progress);}}else{feedback=`${explain(result)} Bu hamle hedefi karşılamadı. Aynı konumda tekrar dene.`;state=structuredClone(view==='learn'?lessons[lesson].state:puzzle.state);}render();announce(feedback);$('.turn-box')?.scrollIntoView({behavior:reduced()?'instant':'smooth',block:'nearest'});}
 }
 function requestComputer(s){return new Promise(resolve=>{let done=false;const complete=r=>{if(done)return;done=true;clearTimeout(workerTimer);worker?.terminate();worker=null;resolve(r);};try{worker=new Worker(new URL('./ai-worker.js',import.meta.url),{type:'module'});worker.onmessage=({data})=>{if(data.error)complete(chooseMove(s,'easy',session.style));else complete(data);};worker.onerror=()=>complete(chooseMove(s,'easy',session.style));workerTimer=setTimeout(()=>complete(chooseMove(s,'easy',session.style)),4500);worker.postMessage({id:epoch,state:s,level:session.level,style:session.style});}catch{complete(chooseMove(s,'easy',session.style));}});}
-async function scheduleComputer(){if(view!=='game'||session.mode!=='solo'||state.turn!==1||state.ended||busy||thinking)return;const token=epoch;thinking=true;render();const [r]=await Promise.all([requestComputer(structuredClone(state)),pause(reduced()?0:500)]);if(token!==epoch||view!=='game')return;thinking=false;if(legalMoves(state).includes(r.pit))playPit(r.pit);else {render();toast('Rakip hamlesi hazırlanamadı. Oyunu kaydettik; ana sayfadan devam edebilirsin.');}}
+async function scheduleComputer(){if(view!=='game'||session.mode!=='solo'||state.turn!==1||state.ended||busy||thinking)return;const token=epoch;thinking=true;render();const [r]=await Promise.all([requestComputer(structuredClone(state)),pause(reduced()?0:1000)]);if(token!==epoch||view!=='game')return;thinking=false;if(legalMoves(state).includes(r.pit))playPit(r.pit);else {render();toast('Rakip hamlesi hazırlanamadı. Oyunu kaydettik; ana sayfadan devam edebilirsin.');}}
 function nextRound(){stopAsync();advanceRound(session);state=session.state;selected=null;previewResult=null;lastMessage=`Bu kez ${session.names[state.turn]} başlıyor.`;saveSession();render();window.scrollTo({top:0,behavior:'instant'});scheduleComputer();}
 async function replayBest(){if(busy||!session.history.length)return;stopAsync();const best=session.history.map(h=>({h,r:move(h.before,h.pit,true)})).sort((a,b)=>b.r.gain-a.r.gain)[0],token=epoch;busy=true;replaying=true;render();paintBoard(best.h.before.board);$('.board')?.scrollIntoView({behavior:'smooth',block:'center'});await pause(reduced()?0:650);if(!await animate(best.r,token))return;await pause(reduced()?0:900);if(token!==epoch)return;busy=false;replaying=false;render();announce('Hamle tekrarı bitti. Sonuç tahtası geri geldi.');}
 let modalReturnFocus=null,confirmCallback=null;
@@ -124,7 +154,7 @@ document.addEventListener('click',e=>{const pit=e.target.closest('[data-pit]');i
  else if(action==='settings')settings();
  else if(action==='save-settings'){prefs.sound=$('#setting-sound').checked;prefs.speed=$('#setting-speed').value;write('settings',prefs);closeModal();if(!busy)render();}
  else if(action==='rules')rules();
- else if(action==='about')openModal('Bir avuç taş, bin hamle.',`<p>Mangala, basit bir tahtada derin düşünmeye alan açan geleneksel bir strateji oyunu. Bu sürüm, Türk Mangala’sının altı kuyulu, 48 taşlı kurallarını temel alır.</p><p>Bilgisayar rakibi cihazında hesap yapar. Oyun hesabı ve ücretli yapay zekâ servisi gerekmez. İki kişilik mod aynı cihazda oynanır.</p><p>Oyunlar ve ilerleme bu tarayıcıda tutulur; tarayıcı verilerini silmek bunları da siler. Sesler ve görseller uygulamanın içinde üretilir.</p><p><a href="https://github.com/Gokhanagingil/mandala" target="_blank" rel="noopener">Kaynak kodu ↗</a> · Sürüm 1.0</p>`);
+ else if(action==='about')openModal('Bir avuç taş, bin hamle.',`<p>Mangala, basit bir tahtada derin düşünmeye alan açan geleneksel bir strateji oyunu. Bu sürüm, Türk Mangala’sının altı kuyulu, 48 taşlı kurallarını temel alır.</p><p>Bilgisayar rakibi cihazında hesap yapar. Oyun hesabı ve ücretli yapay zekâ servisi gerekmez. İki kişilik mod aynı cihazda oynanır.</p><p>Oyunlar ve ilerleme bu tarayıcıda tutulur; tarayıcı verilerini silmek bunları da siler. Sesler ve görseller uygulamanın içinde üretilir.</p><p><a href="https://github.com/Gokhanagingil/mandala" target="_blank" rel="noopener">Kaynak kodu ↗</a> · Sürüm 1.1</p>`);
  else if(action==='close')closeModal();
  else if(action==='confirm'){const cb=confirmCallback;closeModal();cb?.();}
 });

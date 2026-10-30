@@ -4,7 +4,14 @@ Türk Mangala’sının tarayıcıda oynanan, Türkçe ve mobil uyumlu sürümü
 
 Oyun: https://mangala.gokhan-agingil.chatgpt.site
 
-## Sürüm 1.0
+## Sürüm 1.1
+
+- Dağıtılan her taş kaynak kuyudan hedef bölmeye ayrı bir yay hareketiyle gider; sayı taş yerine ulaştığında artar. Hedef bölme ve elde kalan taş sayısı görünür.
+- Yeni varsayılan Sakin hızında her dağıtım taşı 620 ms hareket ve 170 ms iniş arasıyla gösterilir. Normal ve Hızlı seçenekleri korunur; eski hız tercihleri bu sürümde bir kez Sakin'e taşınır.
+- Hazinelerde sayı kadar taş görünür; yakalama ve el sonu toplama da tek tek canlandırılır. Mobilde üst/alt, masaüstünde yan hazineler aynı taş sayısını gösterir.
+- Sıra ve sonuç ekranı dağıtım bitince değişir. Animasyon sırasında çıkış, tamamlanmış hamleyi güvenle kaydeder.
+
+## Oyun özellikleri
 
 - Tek kişi: üç zorluk (Rahat / Odaklı / Usta), üç değerlendirme tarzı (Dengeli / Atak / Temkinli). Cihaz üzerinde çalışan, Web Worker içindeki sınırlı arama; ücretli API veya LLM yok.
 - Aynı cihazda iki kişi: oyuncu adları, açık sıra göstergesi, iki oyuncuya ortak önizleme tercihi.
@@ -46,6 +53,7 @@ python3 -m http.server 8000 --directory dist
 ## Dosyalar
 
 - `dist/engine.js`: saf kural motoru ve animasyon olayları
+- `dist/animation.js`: taş uçuşları, hazine yerleşimi ve görsel olay sırası
 - `dist/ai.js`, `dist/ai-worker.js`: seviyeli bilgisayar rakibi
 - `dist/session.js`: kayıt doğrulama, tur puanlama, rövanş
 - `dist/app.js`: ekranlar, yerel kayıt, ses, etkileşimler
