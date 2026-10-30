@@ -2,7 +2,10 @@
 
 The Android app bundles the exact `dist/` game and serves it through AndroidX
 WebViewAssetLoader on a local HTTPS origin. It works offline from first launch,
-without INTERNET or storage permissions. Career, settings and games use private
+without INTERNET or storage permissions. The Android build combines the unchanged
+engine and AI modules into an in-memory Blob worker, because dedicated module-worker
+requests do not reliably pass through WebViewAssetLoader. This keeps AI work off the
+UI thread without adding network access or changing the web version. Career, settings and games use private
 WebView storage. Portrait and landscape are supported; rotation keeps the current
 WebView and move animation alive. Android Back closes dialogs, returns from a
 board to its parent screen, then offers an exit confirmation.

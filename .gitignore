@@ -14,3 +14,4 @@ android/local.properties
 *.keystore
 apk-output/
 android/app/src/androidTest/assets/winning-position.json
+android/generated/

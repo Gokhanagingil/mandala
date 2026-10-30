@@ -28,10 +28,20 @@ android {
     sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/gameAssets')
     lint { abortOnError true; checkReleaseBuilds true }
 }
+def androidAssets = tasks.register('prepareAndroidAssets', Exec) {
+    workingDir rootProject.file('..')
+    commandLine 'node', 'scripts/android-assets.mjs'
+}
 def gameAssets = tasks.register('syncGameAssets', Sync) {
-    from('../../dist') { into 'www' }
+    dependsOn androidAssets
+    from('../generated')
     into layout.buildDirectory.dir('generated/gameAssets')
 }
+def testFixture = tasks.register('prepareAndroidTestFixture', Exec) {
+    workingDir rootProject.file('..')
+    commandLine 'node', 'scripts/android-fixture.mjs'
+}
+tasks.named('preDebugAndroidTestBuild').configure { dependsOn testFixture }
 tasks.named('preBuild').configure { dependsOn gameAssets }
 dependencies {
     implementation 'androidx.activity:activity:1.10.1'

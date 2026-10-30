@@ -42,7 +42,7 @@ public final class OfflineGameTest {
             if("true".equals(js(condition)))return;
             Thread.sleep(100);
         }
-        fail("Condition not reached: "+condition+"; page="+js("document.body.innerText.slice(0,1600)"));
+        fail("Condition not reached: "+condition+"; worker="+js("document.body.dataset.worker")+"; page="+js("document.body.innerText.slice(0,1600)"));
     }
     private void click(String selector) throws Exception { js("document.querySelector('"+selector+"').click()"); }
     private void back() {
@@ -60,8 +60,11 @@ public final class OfflineGameTest {
         assertEquals("5",js("document.querySelectorAll('.rival-card:disabled').length"));
         back();
         await("!document.querySelector('#modal').open");
-        js("import('./engine.js').then(({initialState})=>{const w=new Worker(new URL('./ai-worker.js',location.href),{type:'module'});w.onmessage=({data})=>{document.body.dataset.worker=Number.isInteger(data.pit)&&data.pit>=7&&data.pit<=12?'ok':'fail';w.terminate();};w.onerror=()=>document.body.dataset.worker='error';w.postMessage({id:1,state:initialState(1),level:'beginner',style:'balanced'});})");
-        await("document.body.dataset.worker==='ok'");
+        assertEquals("true",js("typeof MangalaAndroid?.createAiWorker==='function'"));
+        for(String level:new String[]{"beginner","hard"}){
+            js("document.body.dataset.worker='pending';import(new URL('./engine.js',location.href).href).then(({initialState})=>{const w=MangalaAndroid.createAiWorker();w.onmessage=({data})=>{document.body.dataset.worker=Number.isInteger(data.pit)&&data.pit>=7&&data.pit<=12?'ok':'fail:'+JSON.stringify(data);w.terminate();};w.onerror=e=>document.body.dataset.worker='error:'+e.message;w.postMessage({id:1,state:initialState(1),level:'"+level+"',style:'balanced'});}).catch(e=>document.body.dataset.worker='import:'+e.message)");
+            await("document.body.dataset.worker==='ok'");
+        }
         click("[data-action=new]");
         click("[data-pit=\"0\"]");click("[data-action=commit]");
         await("JSON.parse(localStorage.getItem('mangala.session'))?.history.length>=2 && !!document.querySelector('.bottom-pit:not(:disabled)')");
