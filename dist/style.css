@@ -46,3 +46,53 @@ dialog{background:var(--white);color:var(--ink);padding:30px;border:1px solid #d
  .store-label,.board-home .store-label{display:block;top:-10px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);background:#e5c695;color:#624523;padding:2px 7px;border-radius:5px;font-size:7px;letter-spacing:1px;white-space:nowrap;z-index:3}
  .distribution-status{top:-16px;padding:6px 11px;font-size:10px}
 }
+
+/* The same left/right ownership stays visible in both screen orientations. */
+.store.left-store{--owner:#85501e;border-color:#9b682f;background:linear-gradient(90deg,#a87d49,#ba925b);box-shadow:inset 0 5px 10px #67452280,inset 0 -3px 5px #edd2a3,0 0 0 2px #a46c2e55}
+.store.right-store{--owner:#14584b;border-color:#327969;background:linear-gradient(90deg,#829274,#a1a880);box-shadow:inset 0 5px 10px #354e3980,inset 0 -3px 5px #e3e5baba,0 0 0 2px #28776455}
+.store-owner{position:absolute;top:6px;left:3px;right:3px;text-align:center;color:var(--owner);font-weight:700;font-size:10px;line-height:1.3;z-index:3}
+.store-owner b{font-size:14px;display:block;line-height:1.1;margin-bottom:2px}
+.store-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.store .store-label,.board-home .store-label{display:block;top:41px;bottom:auto;left:0;right:0;transform:none;background:none;padding:0;font-size:7px;letter-spacing:1px;color:var(--owner);text-align:center}
+.store .store-stones{inset:56px 4px 43px}
+.store .store-count{color:var(--owner);border:1px solid var(--owner)}
+.pit.bottom-pit:not(.selected) .pit-number{background:#194e46;color:#fff5d8}
+.pit.top-pit:not(.selected) .pit-number{background:#885723;color:#fff5d8}
+.bottom-pit{border-bottom-color:#397a68}.top-pit{border-top-color:#9c6527}
+.owner-upper{color:#885723}.owner-lower{color:#195b4e}
+.rotate-hint{display:none}
+@media(max-width:480px){
+ .game-layout .board{width:calc(100% + 24px);margin-left:-12px;padding:22px 7px 24px;border-radius:24px}
+ .board-home{padding:22px 7px 24px}
+ .board-grid,.board-home .board-grid,.game-layout .board-grid{grid-template-columns:30px repeat(6,minmax(0,1fr)) 30px;grid-template-rows:68px 68px;gap:26px 3px}
+ .store.left-store{grid-column:1;grid-row:1/3;padding:0}.store.right-store{grid-column:8;grid-row:1/3;padding:0}
+ .pit.top-pit{grid-row:1}.pit.bottom-pit{grid-row:2}
+ .store{border-radius:17px}.store-owner{left:1px;right:1px;font-size:7px}.store-owner b{font-size:12px}
+ .store .store-label,.board-home .store-label{top:35px;font-size:6px;letter-spacing:.7px}
+ .store .store-stones{inset:48px 2px 38px;border-radius:9px}
+ .store .treasury-stone{left:var(--sx);top:var(--sy);width:47%;height:11px;max-width:14px}
+ .store .store-count{top:auto;bottom:7px;left:50%;right:auto;transform:translateX(-50%);width:24px;height:25px;font-size:12px}
+ .pit-number{min-width:22px;font-size:11px;padding:2px 4px;bottom:-10px}.pit-index{top:-12px}
+ .board-legend{gap:8px;font-size:9px;margin-top:24px}.player-name small{font-size:10px}
+ .rotate-hint{display:flex;align-items:center;justify-content:center;gap:7px;font-size:10px;color:#5f6c60;margin:4px 0 0;line-height:1.5}
+ .rotate-hint span{font-size:19px}
+}
+@media(orientation:landscape) and (max-height:520px) and (min-width:560px){
+ .is-playing .header{height:42px}.is-playing .brand img{width:26px;height:26px}.is-playing .brand-word{font-size:24px}.is-playing .brand small{display:none}
+ .is-playing .nav button{padding:8px 12px;font-size:11px}.is-playing .icon-btn{width:29px;height:29px;font-size:16px}
+ .game-top{padding:5px 0 3px;align-items:center}.game-top>div{display:flex;align-items:center;gap:15px}.game-top h1{font-size:19px;margin:0}.game-top .text-btn{padding:3px 0;font-size:10px;min-height:24px;height:24px}
+ .game-layout{display:block;padding:0 0 12px}.game-layout .board{padding:13px 15px 18px;border-radius:28px;margin-bottom:15px}.board:before{border-radius:22px;inset:6px}
+ .game-layout .board-grid{grid-template-columns:52px repeat(6,minmax(0,1fr)) 52px;grid-template-rows:repeat(2,clamp(42px,calc((100dvh - 282px - env(safe-area-inset-bottom)) / 2),58px));gap:23px 9px}
+ .player-strip,.player-strip.bottom{padding:5px 0;height:37px}.player-name{gap:9px}.avatar{width:24px;height:24px;font-size:12px}.player-name strong{font-size:12px}.player-name small{font-size:9px;margin-top:2px}.score{font-size:23px}
+ .store-owner{top:4px;font-size:9px}.store-owner b{display:inline;font-size:10px;margin-right:4px}.store-name{display:inline}.store .store-label{top:19px;font-size:6px}.store .store-stones{inset:32px 4px 34px}.store .store-count{width:25px;height:24px;bottom:5px;font-size:12px}
+ .store .treasury-stone{height:11px;max-width:14px}.pit-index{top:-12px;font-size:8px}.pit-number{bottom:-10px;font-size:11px;padding:2px 6px}
+ .board-legend{display:none}.action-row{margin:1px 0}.action-row button{padding:4px 9px;min-height:28px;font-size:10px}.save-note{display:none}
+ .playing{padding-bottom:65px}.is-playing .footer{margin-top:18px}.mobile-goal{display:none}.lesson-note{font-size:11px;padding:8px 12px;margin:4px 0}.lesson-note strong{display:inline;margin-right:7px}.progress-track{margin:4px 0 7px}
+ .mobile-dock{position:fixed;bottom:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f9f7eef5;backdrop-filter:blur(14px);border-top:1px solid #cfd5c5;padding:7px 22px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -8px 25px #26402b0c;z-index:20}
+ .mobile-dock small{display:block;color:var(--muted);font-size:9px;margin-bottom:3px}.mobile-dock strong{display:block;font-size:11px}.mobile-dock .primary{font-size:12px;padding:10px 24px;min-height:40px}.turn-box>[data-action="commit"]{display:none}
+}
+
+.pit .stone{height:auto;aspect-ratio:1.15}
+@media(orientation:landscape) and (max-height:350px) and (min-width:560px){.is-playing .header{display:none}.player-strip,.player-strip.bottom{height:32px}}
+@media(orientation:landscape) and (max-height:300px) and (min-width:560px){.player-strip,.player-strip.bottom{height:26px}}
+@media(orientation:landscape) and (max-height:520px) and (min-width:560px){.is-playing .shell{width:calc(100% - max(32px, env(safe-area-inset-left)) - max(32px, env(safe-area-inset-right)))}.mobile-dock{padding-left:max(22px, env(safe-area-inset-left));padding-right:max(22px, env(safe-area-inset-right))}}

@@ -1,4 +1,4 @@
-# Mangala 1.2 doğrulaması
+# Mangala 1.3 doğrulaması
 
 Tarih: 30 Ekim 2026
 
@@ -17,6 +17,15 @@ Tarih: 30 Ekim 2026
 - Sonucun yalnız bir kez puanlanması, turnuva boyunca dönüşümlü başlama, beraberlik ve rövanş.
 - Tek tek dağıtım sırası ve eldeki taş sayısı; bütün bulmaca çözümlerinde yakalama/toplama animasyonlarının motor sonucuna eşitliği; uçuş sırasında ve sonrasında taş korunumu.
 - 0, 1, 8, 24 ve 48 taşlı hazinelerde gerçek adetle eşleşen görseller ve iki yönlü yerleşim sınırları.
+
+## 1.3 tarayıcı kontrolleri
+
+- 360×800 dikey ve 844×390 yatay Chrome iframe görünümleri karşılaştırıldı. Kaydırma çubuğu sonrası 345 ve 829 CSS piksel genişliklerde yatay taşma yok; hazineler her iki görünümde solda/sağda kalır.
+- Tek kişilik dikey oyunda insanın sağ hazineye taş bırakması, bilgisayarın ek hamleleri ve yakalaması oynandı. Son durumda solda 14, sağda 2 taş; hazinelerin gerçek taş görselleri ile sayaçları eşleşti ve toplam 48 taş korundu.
+- Yatay iki kişilik oyunda Ece (alt/sağ) ve Can (üst/sol) adlarıyla açılış oynandı. İki oyuncunun da kendi hazinesine bir taş bırakması ve ek sıra kazanması doğrulandı; iki hazinede de birer gerçek taş vardı.
+- Üst sıra kahverengi, alt sıra yeşil; sahiplik rengi aktif oyuncu değiştiğinde korunur. Oyuncu adları ve ayrı simgeler renk ayrımını destekler.
+- Yatay görünümde başlık, tahta, alt oyuncu bilgisi ve sabit hamle düğmesi incelendi. Tahta gölgesinin oyuncu adına yaklaşması ve etkin üst kuyuların yeşil rozet alması giderildi.
+- Ekran yönü kilitlenmez. Dar dikey görünüm oynanabilir kalır; daha geniş kuyular için yatay kullanım önerilir. Cihaz çentiği ve alt güvenli alanı CSS ile hesaba katılır; fiziksel cihaz testi yapılmadı.
 
 ## 1.2 tarayıcı kontrolleri
 

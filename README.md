@@ -4,13 +4,19 @@ Türk Mangala’sının tarayıcıda oynanan, Türkçe ve mobil uyumlu sürümü
 
 Oyun: https://mangala.gokhan-agingil.chatgpt.site
 
-## Sürüm 1.2
+## Sürüm 1.3
+
+- Hazineler her ekran yönünde tahtanın iki yanında: alt oyuncunun hazinesi sağda, üst oyuncununki solda. Oyuncu adı, simge, sıra rengi ve yön açıklaması birlikte aidiyeti gösterir; sıra değişince renkler değişmez.
+- Telefon yatay çevrildiğinde tahta genişler; başlıklar ve hamle çubuğu ekran yüksekliğine uyarlanır. Dikey kullanım da açık kalır ve kısa bir yatay kullanım önerisi gösterilir; ekran yönü zorlanmaz.
+- Öğretici, bulmacalar ve normal oyun aynı yerleşimi kullanır. Taşların iniş noktaları yan hazinelere göre hesaplanır; kuyu taşlarının en-boy oranı dar ve geniş ekranlarda korunur.
+
+### Korunan taş animasyonları
 
 - Seçilen kuyuda bir taş kalır; kalan gerçek taş görsellerinin tamamı birlikte havaya kalkar. Tek taşlı kuyunun tek taşı alınır.
 - Taşlar yükselirken %25 büyür, aynı grup sıradaki kuyuya ilerler ve bir taş gruptan ayrılıp küçülerek yerine iner. Gruptaki diğer taşlar görünür kalır.
 - Sayı rozetleri yalnızca taş kaldırılınca veya yerine inince değişir; taşların rengi ve yerleşimi hamle bitince yeniden karıştırılmaz. Kalabalık kuyularda da her taşın bir görseli vardır.
 - Öğretici, bulmacalar, tek kişilik oyun, bilgisayar hamleleri, iki kişilik oyun ve hamle tekrarları aynı animasyonu kullanır.
-- Hazinelerde sayı kadar taş görünür; yakalama ve el sonu toplama da tek tek canlandırılır. Mobilde üst/alt, masaüstünde yan hazineler kullanılır.
+- Hazinelerde sayı kadar taş görünür; yakalama ve el sonu toplama da tek tek canlandırılır.
 - Sakin / Normal / Hızlı seçenekleri ve hareket azaltma desteği korunur. Sıra ve sonuç ekranı dağıtım bitince değişir. Animasyon sırasında çıkış, tamamlanmış hamleyi güvenle kaydeder.
 
 ## Oyun özellikleri

@@ -85,7 +85,7 @@ export function createStoneMotion(){
   await Promise.all(hand.map((item,j)=>motion(item,{x:p.x+p.layout.points[j].x,y:p.y+p.layout.points[j].y,scale:1.25},duration)));
  }
  function landing(i,item){
-  const target=bed(i),p=i===6||i===13?treasuryPoint(target.children.length,innerWidth<=480):pitPoint(target.children.length,i),rect=target.getBoundingClientRect(),c=local(rect);
+  const target=bed(i),p=i===6||i===13?treasuryPoint(target.children.length):pitPoint(target.children.length,i),rect=target.getBoundingClientRect(),c=local(rect);
   const probe=document.createElement('span');probe.className=`stone ${i===6||i===13?'treasury-stone':''}`;probe.style.visibility='hidden';target.append(probe);
   const scaleX=probe.offsetWidth/item.width,scaleY=probe.offsetHeight/item.height;probe.remove();
   return {target,p,x:c.x+rect.width*(p.x/100-.5),y:c.y+rect.height*(p.y/100-.5),scaleX,scaleY};
