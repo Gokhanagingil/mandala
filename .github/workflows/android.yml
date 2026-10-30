@@ -1,0 +1,117 @@
+name: Android APK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'dist/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Game checks and native test fixture
+        run: |
+          npm run build
+          npm test
+          node scripts/android-fixture.mjs
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - name: Android SDK
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Build and lint
+        run: gradle -p android --no-daemon assembleRelease assembleDebug assembleDebugAndroidTest lintRelease
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Offline Android integration tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          profile: pixel_2
+          disable-animations: false
+          script: |
+            gradle -p android --no-daemon connectedDebugAndroidTest
+            adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.gokhanagingil.mangala.preview/com.gokhanagingil.mangala.MainActivity
+            sleep 2
+            mkdir -p apk-output
+            adb shell screencap -p /sdcard/mangala.png
+            adb pull /sdcard/mangala.png apk-output/android-emulator.png
+      - name: Verify and stage installable preview
+        run: |
+          mkdir -p apk-output
+          cp android/app/build/outputs/apk/debug/app-debug.apk apk-output/Mangala-1.4.0-preview.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs apk-output/Mangala-1.4.0-preview.apk > apk-output/signature-info.txt
+          "$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 apk-output/Mangala-1.4.0-preview.apk
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging apk-output/Mangala-1.4.0-preview.apk > apk-output/package-info.txt
+          git rev-parse HEAD > apk-output/source-commit.txt
+          cp android/README.md apk-output/README.md
+          cd apk-output
+          sha256sum Mangala-1.4.0-preview.apk > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mangala-1.4.0-preview
+          path: apk-output/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mangala-android-test-results
+          path: |
+            android/app/build/reports/
+            android/app/build/outputs/androidTest-results/
+          retention-days: 30
+  publish:
+    needs: android
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Mangala-1.4.0-preview
+          path: apk-output
+      - name: Publish tested preview APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BUILD_SHA: ${{ github.sha }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          cat > release-notes.txt <<'NOTES'
+          Mangala 1.4.0 Android deneme sürümü.
+
+          APK dosyasını Android telefonunuza indirip açın. Android 8.0 veya üzeri ve güncel Android System WebView gerekir. İnternet izni istemez; oyun, rakipler ve bulmacalar cihazda çalışır.
+
+          Bu sürüm geçici Android debug imzası kullanır ve "Mangala Deneme" adıyla kurulur. Mağaza sürümü değildir. Sonraki deneme sürümüne geçerken eskiyi kaldırmak gerekebilir; kaldırma yerel ilerlemeyi siler. Tarayıcıdaki ilerleme uygulamaya otomatik aktarılmaz.
+
+          41 oyun testi, Android lint ve Android emülatöründe çevrimdışı oyun, rakip açma/seçme, dönüş, kayıt kurtarma ve Geri tuşu testleri yayından önce çalıştırılır. Gerçek telefon testi ayrıca yapılmalıdır.
+          NOTES
+          gh release create "android-v1.4.0-preview.$BUILD_NUMBER" apk-output/Mangala-1.4.0-preview.apk apk-output/SHA256SUMS apk-output/source-commit.txt --repo "$GH_REPO" --target "$BUILD_SHA" --title "Mangala 1.4.0 · Android Deneme" --notes-file release-notes.txt --prerelease

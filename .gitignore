@@ -3,3 +3,14 @@ node_modules/
 .DS_Store
 .env*
 qa/
+
+# Native Android outputs and private signing material
+.gradle/
+**/build/
+android/local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+apk-output/
+android/app/src/androidTest/assets/winning-position.json
