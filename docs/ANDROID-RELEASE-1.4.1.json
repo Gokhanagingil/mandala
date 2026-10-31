@@ -1,0 +1,41 @@
+{
+  "applicationId": "com.gokhanagingil.mangala",
+  "versionCode": 14002,
+  "versionName": "1.4.1",
+  "debuggable": false,
+  "permissions": [
+    "com.gokhanagingil.mangala.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "minimumAndroidSdk": 26,
+  "unsignedSha256": "c3a9055a04d21cc1303b0a494405233da2c79880c15f109a678c3ca7d120d24c",
+  "sourceCommit": "dfb37e579313ea85c64092578da885dce9c6eded",
+  "apkSha256": "6be8bce1646c6060d6df80a66cf80ced89c96e3bfef575f099c7b2bf02820891",
+  "certificateSha256": "8499bc1472cda830fe0007fb936002002e7b748a7f0c3c09f922d6a4b36c4a9b",
+  "signatureSchemes": [
+    2,
+    3
+  ],
+  "payloadUnchanged": true,
+  "productionSigning": true,
+  "validation": {
+    "gameTests": 41,
+    "nativeTests": 6,
+    "workflow": "https://github.com/Gokhanagingil/mandala/actions/runs/41196174646",
+    "updateFromVersionCode": 14001,
+    "updateToVersionCode": 14002,
+    "preserved": [
+      "unfinished game",
+      "career and opponent selection",
+      "puzzle progress",
+      "sound and animation settings"
+    ],
+    "buildType": "non-debuggable release",
+    "nativeSigning": "CI-only QA key; production APK signed privately afterward with payload equality verified",
+    "backupRecovery": "Permanent private key restored from backup and used to sign the delivered APK",
+    "negativeSigningChecks": [
+      "wrong key refused",
+      "modified APK input refused"
+    ],
+    "physicalPhoneTested": false
+  }
+}

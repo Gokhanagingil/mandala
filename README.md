@@ -85,3 +85,15 @@ python3 -m http.server 8000 --directory dist
 - `docs/QA.md`: yapılan kontroller ve sınırlar
 
 Hosting kimliği `.openai/hosting.json` içindedir. Bu kimlik yeni yayınlarda korunmalıdır. GitHub kod deposu ve Sites yayın deposu ayrı Git geçmişleri kullanır; kaynak içerikleri eşlenir.
+
+## Android · kalıcı imzalı 1.4.1
+
+Kalıcı Android uygulaması **Mangala** adı ve `com.gokhanagingil.mangala`
+kimliğiyle hazırlanır. İmza sertifikası sabittir; özel anahtar yalnızca sahibinin
+özel yedeğinde tutulur. Gelecek APK güncellemelerinde aynı anahtar ve daha yüksek
+versionCode kullanılmalıdır. Önceki `.preview` uygulaması ayrı kalır.
+
+Yayın derlemesinde 41 oyun testi ve 6 Android kontrolü geçti; uygulamanın üzerine
+yeni sürüm kurulurken oyun, rakip, bulmaca ve ayar kayıtları korundu.
+[Derleme ve imzalama](android/README.md) ·
+[1.4.1 doğrulama kaydı](docs/ANDROID-RELEASE-1.4.1.json).
