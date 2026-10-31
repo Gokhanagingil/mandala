@@ -30,9 +30,20 @@ public final class UpgradeTest {
     }
     private void click(String selector) throws Exception {js("document.querySelector('"+selector+"').click()");}
 
+    private void assertInstalledVersion(int code, String name) {
+        scenario.onActivity(a -> {
+            try {
+                android.content.pm.PackageInfo info=a.getPackageManager().getPackageInfo(a.getPackageName(),0);
+                assertEquals(code,info.versionCode);
+                assertEquals(name,info.versionName);
+            } catch(android.content.pm.PackageManager.NameNotFoundException e) {throw new AssertionError(e);}
+        });
+    }
+
     @Test public void seedBeforeUpdate() throws Exception {
         try(ActivityScenario<MainActivity> opened=ActivityScenario.launch(MainActivity.class)){
             scenario=opened;
+            assertInstalledVersion(14001,"1.4.0");
             await("!!document.querySelector('[data-action=new]')");
             js("localStorage.clear();localStorage.setItem('mangala.career',JSON.stringify({version:1,cleared:['deniz'],selected:'ece'}));localStorage.setItem('mangala.progress',JSON.stringify({solved:[1,2,3],learned:true}));localStorage.setItem('mangala.settings',JSON.stringify({sound:false,speed:'fast',paceVersion:2}));document.body.dataset.old='yes';location.reload();");
             await("!document.body.dataset.old && !!document.querySelector('.selected-rival')");
@@ -48,6 +59,7 @@ public final class UpgradeTest {
     @Test public void verifyAfterUpdate() throws Exception {
         try(ActivityScenario<MainActivity> opened=ActivityScenario.launch(MainActivity.class)){
             scenario=opened;
+            assertInstalledVersion(14002,"1.4.1");
             scenario.onActivity(a -> {
                 assertEquals("com.gokhanagingil.mangala",a.getPackageName());
                 assertEquals("Mangala",a.getApplicationInfo().loadLabel(a.getPackageManager()).toString());

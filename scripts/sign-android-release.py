@@ -43,7 +43,7 @@ before=payload(args.unsigned_apk)
 args.output_apk.parent.mkdir(parents=True,exist_ok=True)
 subprocess.run(['java','-jar',str(args.apksigner),'sign','--ks',str(args.keystore),
     '--ks-key-alias',identity['keyAlias'],'--ks-pass','file:'+str(args.password_file),
-    '--key-pass','file:'+str(args.password_file),'--v1-signing-enabled','false',
+    '--v1-signing-enabled','false',
     '--v2-signing-enabled','true','--v3-signing-enabled','true','--v4-signing-enabled','false',
     '--out',str(args.output_apk),str(args.unsigned_apk)],check=True)
 verification=subprocess.check_output(['java','-jar',str(args.apksigner),'verify','--verbose','--print-certs',str(args.output_apk)],text=True)

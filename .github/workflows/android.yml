@@ -52,9 +52,9 @@ jobs:
           python3 -c 'import secrets,pathlib; pathlib.Path("native-qa/password").write_text(secrets.token_urlsafe(48))'
           chmod 600 native-qa/password
           keytool -genkeypair -keystore native-qa/qa.p12 -storetype PKCS12 -storepass:file native-qa/password -keypass:file native-qa/password -alias qa-only -keyalg RSA -keysize 2048 -validity 2 -dname 'CN=Ephemeral CI QA' -noprompt
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --key-pass file:native-qa/password --out native-qa/baseline.apk apk-output/Mangala-1.4.0-baseline-unsigned.apk
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --key-pass file:native-qa/password --out native-qa/candidate.apk apk-output/Mangala-1.4.1-unsigned.apk
-          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --key-pass file:native-qa/password --out native-qa/tests.apk android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --out native-qa/baseline.apk apk-output/Mangala-1.4.0-baseline-unsigned.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --out native-qa/candidate.apk apk-output/Mangala-1.4.1-unsigned.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" sign --ks native-qa/qa.p12 --ks-pass file:native-qa/password --out native-qa/tests.apk android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk
           rm native-qa/qa.p12 native-qa/password
       - name: Enable emulator acceleration
         run: |
