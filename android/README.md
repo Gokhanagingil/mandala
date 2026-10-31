@@ -1,44 +1,64 @@
-# Mangala Android
+# Mangala Android · permanent release
 
-The Android app bundles the exact `dist/` game and serves it through AndroidX
-WebViewAssetLoader on a local HTTPS origin. It works offline from first launch,
-without INTERNET or storage permissions. The Android build combines the unchanged
-engine and AI modules into an in-memory Blob worker, because dedicated module-worker
-requests do not reliably pass through WebViewAssetLoader. This keeps AI work off the
-UI thread without adding network access or changing the web version. Career, settings and games use private
-WebView storage. Portrait and landscape are supported; rotation keeps the current
-WebView and move animation alive. Android Back closes dialogs, returns from a
-board to its parent screen, then offers an exit confirmation.
+Production application: `com.gokhanagingil.mangala` · launcher name: **Mangala**.
+Version 1.4.1 uses versionCode 14002. Every future update must use this package,
+a larger versionCode and the same private signing key. `release-identity.json`
+and `release-certificate.pem` pin its public certificate; neither is secret.
 
-## Requirements and build
+The encrypted PKCS12 keystore and recovery information are backed up privately
+for the owner. They must never enter git, CI logs, public releases or artifacts.
+The signing script refuses missing keys, the wrong certificate, modified build
+inputs, an old version code or private material placed inside the repository.
+It never creates a replacement key automatically.
 
-Android 8.0+ with an up-to-date Android System WebView (Chromium 111+).
-JDK 17, Gradle 8.13, Android SDK platform 36 and build tools 36.0.0.
+## Build, validate and sign
+
+Requirements: Node 22+, JDK 17, Gradle 8.13, Android SDK 36/build-tools 36.0.0.
 
 ```sh
 npm run build
 npm test
-gradle -p android assembleDebug assembleRelease lintRelease
-gradle -p android connectedDebugAndroidTest
+gradle -p android assembleRelease assembleReleaseAndroidTest lintRelease -PandroidTestBuildType=release
 ```
 
-The GitHub Android workflow performs these checks and tests offline play, the
-AI worker, career progression, opponent selection, rotation, Back and saved game
-recovery on an Android emulator before distributing an installable APK.
+The GitHub Android workflow builds aligned unsigned production APKs and performs
+six native checks on Android 15: four full gameplay tests plus a real
+`adb install -r` update from versionCode 14001 to 14002. The update must retain
+an unfinished game, unlocked/selected rivals, solved puzzles, sound and speed.
+Both QA packages use an ephemeral CI-only key; the permanent key stays outside CI.
+The tested release is non-debuggable and does not request internet/storage access.
 
-## Signing and app identity
+Download the successful `Mangala-1.4.1-release-inputs` artifact and sign locally:
 
-`Mangala-1.4.0-preview.apk` is an installable **preview**, signed with the build
-runner's temporary Android debug key. Its package is
-`com.gokhanagingil.mangala.preview` and launcher label is **Mangala Deneme**.
-It is separate from the future production package `com.gokhanagingil.mangala`.
+```sh
+python3 scripts/sign-android-release.py \
+  /absolute/build/Mangala-1.4.1-unsigned.apk /absolute/output/Mangala-1.4.1.apk \
+  --keystore /private/mangala-release.p12 \
+  --password-file /private/keystore-password.txt \
+  --apksigner /absolute/build/apksigner.jar
+```
 
-A later preview built on a fresh runner may require uninstalling the old preview;
-uninstalling removes local progress. Browser progress and production app progress
-are separate too. This preview is for testing, not Play Store submission.
-No signing private keys are committed, logged, uploaded or cached by this workflow.
+Keep the artifact's adjacent `.json` metadata beside the unsigned APK. The signer
+checks input hash and permanent certificate, verifies v2/v3 signatures and confirms
+that signing leaves every application payload file unchanged. Preserve the output
+verification record and private backup. Before later releases, advance versionCode
+and extend the upgrade baseline/expected version in `UpgradeTest.java` and workflow.
 
-The release variant remains unsigned until a permanent private signing key can be
-securely provisioned. Do not distribute the unsigned APK as an installable release.
-Before production: provision that key, back it up privately, add a secure release
-signing process, and test on physical phones.
+## Offline game and lifecycle
+
+All `dist/` files are bundled, served from a local HTTPS WebViewAssetLoader origin.
+Android combines the unchanged engine/AI into a Blob worker for reliable offline
+background computation. No server or API is needed. Saves remain in private app
+storage. Portrait and landscape are supported; rotation keeps the WebView alive.
+Android Back closes the active dialog, returns to the parent screen, then confirms
+exit. Android 8.0+ and an up-to-date Android System WebView (Chromium 111+) are needed.
+
+## Previous preview
+
+The earlier `com.gokhanagingil.mangala.preview` app is a separate application.
+The permanent release installs beside it without uninstalling it. Browser and
+preview saves are not automatically transferred to the permanent application.
+After the first permanent installation, same-key upgrades preserve its saves;
+uninstalling an app or clearing its data still deletes those saves.
+
+CI validation is performed on an emulator; physical-phone testing remains separate.

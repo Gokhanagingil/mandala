@@ -15,3 +15,9 @@ android/local.properties
 apk-output/
 android/app/src/androidTest/assets/winning-position.json
 android/generated/
+native-qa/
+*.p12
+*.idsig
+*password*.txt
+
+__pycache__/

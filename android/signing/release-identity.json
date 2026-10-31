@@ -1,0 +1,10 @@
+{
+  "applicationId": "com.gokhanagingil.mangala",
+  "keyAlias": "mangala-release",
+  "certificateSha256": "8499bc1472cda830fe0007fb936002002e7b748a7f0c3c09f922d6a4b36c4a9b",
+  "algorithm": "RSA-4096 / SHA256withRSA",
+  "created": "2026-10-31",
+  "validityDays": 36500,
+  "minimumVersionCode": 14002,
+  "rule": "Keep this signing identity. Never generate a replacement key for an existing app."
+}
